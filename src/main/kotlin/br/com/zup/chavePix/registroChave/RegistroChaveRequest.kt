@@ -56,7 +56,15 @@ enum class TipoChave {
         }
 
 
+    },
+    DEFAULT {
+        override fun validaChave(chave: String): Boolean {
+            return true
+        }
+
+
     };
+
 
     abstract fun validaChave(chave: String): Boolean
 
@@ -64,6 +72,7 @@ enum class TipoChave {
 
 enum class TipoConta {
     CONTA_CORRENTE ,
-    CONTA_POUPANCA
+    CONTA_POUPANCA,
+    DEFAULTCONTA
 
 }

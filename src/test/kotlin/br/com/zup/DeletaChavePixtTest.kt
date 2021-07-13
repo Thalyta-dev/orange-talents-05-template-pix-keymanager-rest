@@ -1,26 +1,21 @@
 package br.com.zup
 
-import br.com.zup.chavePix.registroChave.RegistroChaveRequest
-import br.com.zup.chavePix.registroChave.TipoChave
-import br.com.zup.chavePix.registroChave.TipoConta
-import com.zup.*
+import com.zup.PixDeletaRequest
+import com.zup.PixDeletaResponse
+import com.zup.PixDeletaServiceGrpc
 import io.grpc.Status
-import io.grpc.StatusRuntimeException
+import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Replaces
 import io.micronaut.http.HttpRequest
-import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.HttpClient
 import io.micronaut.http.client.annotation.Client
-import io.micronaut.http.client.exceptions.HttpClientException
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.TransactionMode
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -107,11 +102,16 @@ class DeletaChavePixtTest {
 
     }
 
+    @Factory
+    internal class PixGrpcMockStubFactory{
+        @Singleton
+        @Replaces(bean = PixDeletaServiceGrpc.PixDeletaServiceBlockingStub::class)
+        fun `mockGrpcdelete`() = Mockito.mock(PixDeletaServiceGrpc.PixDeletaServiceBlockingStub::class.java)
+
+    }
 
 
-    @Singleton
-    @Replaces(bean = PixDeletaServiceGrpc.PixDeletaServiceBlockingStub::class)
-    fun `mockGrpcdelete`() = Mockito.mock(PixDeletaServiceGrpc.PixDeletaServiceBlockingStub::class.java)
+
 
 
 }

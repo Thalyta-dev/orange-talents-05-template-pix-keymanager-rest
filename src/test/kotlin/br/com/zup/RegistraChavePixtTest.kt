@@ -7,13 +7,13 @@ import com.zup.PixRegistraResponse
 import com.zup.PixRegistraServiceGrpc
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.micronaut.context.annotation.Bean
+import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Replaces
 import io.micronaut.http.HttpRequest
-import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.client.HttpClient
 import io.micronaut.http.client.annotation.Client
-import io.micronaut.http.client.exceptions.HttpClientException
 import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.test.annotation.TransactionMode
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
@@ -21,18 +21,14 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import javax.inject.Inject
 import javax.inject.Singleton
 
 
-@MicronautTest(
-    transactional = false,
-    rollback = false,
-    transactionMode = TransactionMode.SINGLE_TRANSACTION
-)
-class RegistraChavePixtTest {
+@MicronautTest
+internal class RegistraChavePixtTest {
 
     @Inject
     lateinit var grpcClient: PixRegistraServiceGrpc.PixRegistraServiceBlockingStub
@@ -40,7 +36,6 @@ class RegistraChavePixtTest {
     @field:Inject
     @field:Client("/")
     lateinit var client: HttpClient
-
 
     @Test
     fun deveCadastrarChavePix() {
@@ -63,8 +58,7 @@ class RegistraChavePixtTest {
 
 
         assertEquals(HttpStatus.CREATED, response.status)
-//        assertEquals("/pix/${clienteId}/registra/${pixId}", response.header("Location"))
-
+        assertEquals("/pix/${clienteId}/registra/${pixId}", response.header("Location"))
 
     }
 
@@ -76,7 +70,7 @@ class RegistraChavePixtTest {
 
         val request = HttpRequest.POST("/pix/${clienteId}/registra", criaRequisicao())
 
-        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId))).thenThrow(Status.ALREADY_EXISTS.asRuntimeException())
+        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId))).thenThrow(StatusRuntimeException(Status.ALREADY_EXISTS))
 
         val response = Assertions.assertThrows(HttpClientResponseException::class.java){
          client.toBlocking().exchange(request, RegistroChaveRequest::class.java) }
@@ -96,7 +90,8 @@ class RegistraChavePixtTest {
 
         val request = HttpRequest.POST("/pix/${clienteId}/registra", criaRequisicao())
 
-        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId))).thenThrow(Status.NOT_FOUND.asRuntimeException())
+        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId))).thenThrow(StatusRuntimeException(
+            Status.NOT_FOUND))
 
         val response = Assertions.assertThrows(HttpClientResponseException::class.java){
             client.toBlocking().exchange(request, RegistroChaveRequest::class.java) }
@@ -115,10 +110,6 @@ class RegistraChavePixtTest {
             TipoConta.CONTA_CORRENTE
         )
     }
-
-    @Singleton
-    @Replaces(bean = PixRegistraServiceGrpc.PixRegistraServiceBlockingStub::class)
-    fun `mockGrpc`() = Mockito.mock(PixRegistraServiceGrpc.PixRegistraServiceBlockingStub::class.java)
 
 
 }

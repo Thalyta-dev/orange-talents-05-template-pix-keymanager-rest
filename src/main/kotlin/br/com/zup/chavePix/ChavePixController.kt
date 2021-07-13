@@ -1,9 +1,13 @@
-package br.com.zup.chavePix.registroChave
+package br.com.zup.chavePix
+
+import br.com.zup.chavePix.consultaChavePix.*
+import br.com.zup.chavePix.registroChave.PixRegistraChaveResponseGrpc
+import br.com.zup.chavePix.registroChave.RegistroChaveRequest
+import br.com.zup.chavePix.registroChave.TipoChave
+import br.com.zup.chavePix.registroChave.TipoConta
 
 import br.com.zup.edu.shared.validation.ValidUUID
-import com.zup.PixDeletaRequest
-import com.zup.PixDeletaServiceGrpc
-import com.zup.PixRegistraServiceGrpc
+import com.zup.*
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.*
@@ -27,6 +31,9 @@ class ChavePixController(
     @Inject
     lateinit var grpCPixRemove: PixDeletaServiceGrpc.PixDeletaServiceBlockingStub
 
+    @Inject
+    lateinit var grpCPixConsulta: PixConsultaServiceGrpc.PixConsultaServiceBlockingStub
+
     @Post("/registra")
     fun registraChavePix(
         @Body @Valid request: RegistroChaveRequest,
@@ -49,10 +56,25 @@ class ChavePixController(
     fun deletaChavepIX(
         @ValidUUID @PathVariable clienteId: String,
         @ValidUUID @PathVariable pixId: String
-    ): HttpResponse<Any> {
+    ): HttpResponse<DetalhesChavePix> {
 
         grpCPixRemove.deletaChave(PixDeletaRequest.newBuilder().setPixId(pixId).setClientId(clienteId).build())
         return HttpResponse.status(HttpStatus.OK)
+
+    }
+
+    @Get("/consulta/{pixId}")
+    fun consultaPixId(
+        @ValidUUID @PathVariable clienteId: String,
+        @ValidUUID @PathVariable pixId: String
+    ): HttpResponse<Any> {
+
+        val consulta = grpCPixConsulta.consulta(PixConsultaRequest.newBuilder().setPixId(pixId).setClientId(clienteId).build())
+
+        val titular = TitularResponse2(consulta.titular.nome, consulta.titular.cpf)
+        val conta = ContaResponse2(consulta.conta.nomeInstituicao, consulta.conta.agencia, consulta.conta.numero,TipoConta.valueOf(consulta.conta.tipoConta.toString()) )
+        val detalhesChavePix = DetalhesChavePix2(consulta.clientId, consulta.clientId,TipoChave.valueOf(consulta.tipoChave.toString()), consulta.valorChave,titular,conta)
+        return HttpResponse.status<DetalhesChavePix>(HttpStatus.OK).body(detalhesChavePix)
 
     }
 
