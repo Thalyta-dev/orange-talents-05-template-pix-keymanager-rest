@@ -1,7 +1,6 @@
 package br.com.zup.handler
 
 
-import br.com.zup.handler.Erro
 import com.google.rpc.BadRequest
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -20,6 +19,7 @@ import javax.inject.Singleton
 class ChavePixHandler : ExceptionHandler<StatusRuntimeException, HttpResponse<Any>>{
 
     override fun handle(request: HttpRequest<*>?, e: StatusRuntimeException?): HttpResponse<Any> {
+
         val status = io.grpc.protobuf.StatusProto.fromThrowable(e)
         val codigo = e?.status?.code
 
@@ -55,9 +55,37 @@ class ChavePixHandler : ExceptionHandler<StatusRuntimeException, HttpResponse<An
                     return HttpResponse.unprocessableEntity<Any?>().body(body)
                 }
 
-            Status.Code.ALREADY_EXISTS -> return HttpResponse.status(HttpStatus.CONFLICT)
-            Status.Code.NOT_FOUND -> return HttpResponse.notFound()
+            Status.Code.ALREADY_EXISTS ->{
+                val details = if(status?.detailsList?.isEmpty() == true) BadRequest.getDefaultInstance() else status?.detailsList?.last()?.unpack(BadRequest::class.java)
+                val body = Erro(
+                    status = HttpStatus.CONFLICT.code,
+                    titulo = e.status.description!!,
+                    descricao = "",
+                    propriedadesInvalidas = details?.fieldViolationsList?.stream()?.map {
+                        Erro.PropriedadeInvalida(
+                            propriedade = it.field,
+                            descricao = it.description
+                        )
+                    }?.collect(Collectors.toList())
+                )
+                return HttpResponse.status<Any?>(HttpStatus.CONFLICT).body(body)
+            }
+            Status.Code.NOT_FOUND ->{
+                val details = if(status?.detailsList?.isEmpty() == true) BadRequest.getDefaultInstance() else status?.detailsList?.last()?.unpack(BadRequest::class.java)
+                val body = Erro(
+                    status = HttpStatus.CONFLICT.code,
+                    titulo = e.status.description!!,
+                    descricao = "",
+                    propriedadesInvalidas = details?.fieldViolationsList?.stream()?.map {
+                        Erro.PropriedadeInvalida(
+                            propriedade = it.field,
+                            descricao = it.description
+                        )
+                    }?.collect(Collectors.toList())
+                )
+                return HttpResponse.status<Any?>(HttpStatus.NOT_FOUND).body(body)
+            }
+            else ->  return  HttpResponse.serverError()
         }
-        return HttpResponse.serverError();
     }
 }

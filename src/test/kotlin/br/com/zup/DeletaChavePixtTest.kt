@@ -3,8 +3,7 @@ package br.com.zup
 import br.com.zup.chavePix.registroChave.RegistroChaveRequest
 import br.com.zup.chavePix.registroChave.TipoChave
 import br.com.zup.chavePix.registroChave.TipoConta
-import com.zup.PixRegistraResponse
-import com.zup.PixRegistraServiceGrpc
+import com.zup.*
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import io.micronaut.context.annotation.Replaces
@@ -32,10 +31,10 @@ import javax.inject.Singleton
     rollback = false,
     transactionMode = TransactionMode.SINGLE_TRANSACTION
 )
-class RegistraChavePixtTest {
+class DeletaChavePixtTest {
 
     @Inject
-    lateinit var grpcClient: PixRegistraServiceGrpc.PixRegistraServiceBlockingStub
+    lateinit var grpcClient: PixDeletaServiceGrpc.PixDeletaServiceBlockingStub
 
     @field:Inject
     @field:Client("/")
@@ -48,77 +47,71 @@ class RegistraChavePixtTest {
         val clienteId = "5260263c-a3c1-4727-ae32-3bdb25388412"
         val pixId = "5260263c-a3c1-4727-ae32-3bdb2538841b"
 
-        val request = HttpRequest.POST("/pix/${clienteId}/registra", criaRequisicao())
+        val request = HttpRequest.DELETE("/pix/${clienteId}/deleta/${pixId}", clienteId)
 
-        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId)))
+        Mockito.`when`(grpcClient.deletaChave(PixDeletaRequest.newBuilder().setClientId(clienteId).setPixId(pixId).build()))
             .thenReturn(
-                PixRegistraResponse.newBuilder()
-                    .setPixId("5260263c-a3c1-4727-ae32-3bdb25388412")
-                    .setClientId("5260263c-a3c1-4727-ae32-3bdb2538841b").build()
+                PixDeletaResponse.newBuilder()
+                    .setPixId("5260263c-a3c1-4727-ae32-3bdb25388412").build()
             )
 
 
-        val response = client.toBlocking().exchange(request, RegistroChaveRequest::class.java)
+        val response = client.toBlocking().exchange(request, Any::class.java)
 
 
 
-        assertEquals(HttpStatus.CREATED, response.status)
+        assertEquals(HttpStatus.OK, response.status)
+//        assertEquals("/pix/${clienteId}/registra/${pixId}", response.header("Location"))
+
+
+    }
+    @Test
+    fun naoDeveCadastrarChavePixPoisChaveJaFoiRemovida() {
+
+        val clienteId = "5260263c-a3c1-4727-ae32-3bdb25388412"
+        val pixId = "5260263c-a3c1-4727-ae32-3bdb2538841b"
+
+        val request = HttpRequest.DELETE("/pix/${clienteId}/deleta/${pixId}", clienteId)
+
+        Mockito.`when`(grpcClient.deletaChave(PixDeletaRequest.newBuilder().setClientId(clienteId).setPixId(pixId).build())).thenThrow(Status.NOT_FOUND.asRuntimeException())
+
+
+        val response = Assertions.assertThrows(HttpClientResponseException::class.java){
+            client.toBlocking().exchange(request, Any::class.java)}
+
+
+        assertEquals(HttpStatus.NOT_FOUND, response.status)
 //        assertEquals("/pix/${clienteId}/registra/${pixId}", response.header("Location"))
 
 
     }
 
     @Test
-    fun naodeveCadastrarChavePixPoisJaExiste() {
+    fun naoDeveCadastrarChavePixPoisClienteNaoExiste() {
 
         val clienteId = "5260263c-a3c1-4727-ae32-3bdb25388412"
         val pixId = "5260263c-a3c1-4727-ae32-3bdb2538841b"
 
-        val request = HttpRequest.POST("/pix/${clienteId}/registra", criaRequisicao())
+        val request = HttpRequest.DELETE("/pix/${clienteId}/deleta/${pixId}", clienteId)
 
-        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId))).thenThrow(Status.ALREADY_EXISTS.asRuntimeException())
+        Mockito.`when`(grpcClient.deletaChave(PixDeletaRequest.newBuilder().setClientId(clienteId).setPixId(pixId).build())).thenThrow(Status.NOT_FOUND.asRuntimeException())
+
 
         val response = Assertions.assertThrows(HttpClientResponseException::class.java){
-         client.toBlocking().exchange(request, RegistroChaveRequest::class.java) }
+            client.toBlocking().exchange(request, Any::class.java)}
 
 
-        assertNotNull(response)
-        assertEquals(HttpStatus.CONFLICT, response.status)
-
-
-    }
-
-    @Test
-    fun naodeveCadastrarChavePixPoisClienteNaoExiste() {
-
-        val clienteId = "5260263c-a3c1-4727-ae32-3bdb25388412"
-        val pixId = "5260263c-a3c1-4727-ae32-3bdb2538841b"
-
-        val request = HttpRequest.POST("/pix/${clienteId}/registra", criaRequisicao())
-
-        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId))).thenThrow(Status.NOT_FOUND.asRuntimeException())
-
-        val response = Assertions.assertThrows(HttpClientResponseException::class.java){
-            client.toBlocking().exchange(request, RegistroChaveRequest::class.java) }
-
-
-        assertNotNull(response)
         assertEquals(HttpStatus.NOT_FOUND, response.status)
+//        assertEquals("/pix/${clienteId}/registra/${pixId}", response.header("Location"))
 
 
     }
 
-    fun criaRequisicao(): RegistroChaveRequest {
-        return RegistroChaveRequest(
-            TipoChave.TELEFONE,
-            "34850850828",
-            TipoConta.CONTA_CORRENTE
-        )
-    }
+
 
     @Singleton
-    @Replaces(bean = PixRegistraServiceGrpc.PixRegistraServiceBlockingStub::class)
-    fun `mockGrpc`() = Mockito.mock(PixRegistraServiceGrpc.PixRegistraServiceBlockingStub::class.java)
+    @Replaces(bean = PixDeletaServiceGrpc.PixDeletaServiceBlockingStub::class)
+    fun `mockGrpcdelete`() = Mockito.mock(PixDeletaServiceGrpc.PixDeletaServiceBlockingStub::class.java)
 
 
 }
