@@ -1,12 +1,19 @@
 micronaut:
   application:
     name: pix
-datasources:
+grpc:
+  client:
+    plaintext: true
+    max-retry-attempts: 10
+  server:
+    port: 8089
+  channels:
+    pix: #nome do canal em GrpcClientFactory
+      address: 'localhost:50051'
+      plaintext: true
+      max-retry-attempts: 5
+
+jpa:
   default:
-    url: jdbc:mysql://localhost:3306/db
-    driverClassName: com.mysql.cj.jdbc.Driver
-    username: root
-    password: ''
-    schema-generate: CREATE_DROP
-    dialect: MYSQL
-jpa.default.properties.hibernate.hbm2ddl.auto: update
+    entity-scan:
+      packages: 'net.andreinc.mn.crud.backend.*'
