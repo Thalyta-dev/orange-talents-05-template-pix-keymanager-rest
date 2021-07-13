@@ -1,5 +1,6 @@
 package br.com.zup
 
+import br.com.zup.GrpcFactory.GrpcClientFactory
 import com.zup.PixRegistraServiceGrpc
 import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory

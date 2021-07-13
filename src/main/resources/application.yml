@@ -17,3 +17,7 @@ jpa:
   default:
     entity-scan:
       packages: 'net.andreinc.mn.crud.backend.*'
+
+jackson:
+  serialization:
+    writeDatesAsTimestamps: false

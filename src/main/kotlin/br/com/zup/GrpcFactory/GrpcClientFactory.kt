@@ -1,4 +1,4 @@
-package br.com.zup
+package br.com.zup.GrpcFactory
 import com.zup.PixConsultaServiceGrpc
 import com.zup.PixDeletaServiceGrpc
 import com.zup.PixRegistraServiceGrpc

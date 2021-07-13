@@ -45,13 +45,15 @@ internal class RegistraChavePixtTest {
 
         val request = HttpRequest.POST("/pix/${clienteId}/registra", criaRequisicao())
 
-        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId)))
-            .thenReturn(
-                PixRegistraResponse.newBuilder()
+//        Mockito.`when`(grpcClient.cadastraChave(criaRequisicao().toGrpcRequest(clienteId)))
+//            .thenReturn(
+//                PixRegistraResponse.newBuilder()
+//                    .setPixId("5260263c-a3c1-4727-ae32-3bdb25388412")
+//                    .setClientId("5260263c-a3c1-4727-ae32-3bdb2538841b").build()
+//            )
+        Mockito.`when`(grpcClient.cadastraChave(Mockito.any())).thenReturn(PixRegistraResponse.newBuilder()
                     .setPixId("5260263c-a3c1-4727-ae32-3bdb25388412")
-                    .setClientId("5260263c-a3c1-4727-ae32-3bdb2538841b").build()
-            )
-
+                    .setClientId("5260263c-a3c1-4727-ae32-3bdb2538841b").build())
 
         val response = client.toBlocking().exchange(request, RegistroChaveRequest::class.java)
 

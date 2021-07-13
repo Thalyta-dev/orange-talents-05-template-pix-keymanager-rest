@@ -40,7 +40,6 @@ dependencies {
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
     annotationProcessor("javax.persistence:javax.persistence-api:2.2")
     testImplementation("io.micronaut:micronaut-http-client")
-
     implementation("io.micronaut.netflix:micronaut-netflix-hystrix")
     implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")

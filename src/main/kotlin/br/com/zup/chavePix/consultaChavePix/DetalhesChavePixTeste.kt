@@ -3,6 +3,7 @@ package br.com.zup.chavePix.consultaChavePix
 import br.com.zup.chavePix.registroChave.TipoChave
 import br.com.zup.chavePix.registroChave.TipoConta
 import io.micronaut.core.annotation.Introspected
+import java.time.LocalDateTime
 
 @Introspected
 class DetalhesChavePix2(
@@ -11,7 +12,8 @@ class DetalhesChavePix2(
     val tipoChave: TipoChave,
     val valorChave: String,
     val titular: TitularResponse2,
-    val conta: ContaResponse2
+    val conta: ContaResponse2,
+    val criadoEm: LocalDateTime
 ){}
 
 

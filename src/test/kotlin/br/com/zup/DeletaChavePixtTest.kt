@@ -102,15 +102,6 @@ class DeletaChavePixtTest {
 
     }
 
-    @Factory
-    internal class PixGrpcMockStubFactory{
-        @Singleton
-        @Replaces(bean = PixDeletaServiceGrpc.PixDeletaServiceBlockingStub::class)
-        fun `mockGrpcdelete`() = Mockito.mock(PixDeletaServiceGrpc.PixDeletaServiceBlockingStub::class.java)
-
-    }
-
-
 
 
 
