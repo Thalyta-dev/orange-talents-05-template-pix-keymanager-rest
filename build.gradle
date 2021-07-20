@@ -10,7 +10,7 @@ plugins {
 }
 
 version = "0.1"
-group = "br.com.pix.rest"
+group = "br.com.zup"
 
 repositories {
     mavenCentral()
@@ -21,7 +21,7 @@ micronaut {
     testRuntime("junit5")
     processing {
         incremental(true)
-        annotations("br.com.pix.rest.*")
+        annotations("br.com.zup.*")
     }
 }
 
@@ -53,7 +53,7 @@ dependencies {
 
 
 application {
-    mainClass.set("br.com.pix.rest.ApplicationKt")
+    mainClass.set("br.com.zup.ApplicationKt")
 }
 java {
     sourceCompatibility = JavaVersion.toVersion("11")
