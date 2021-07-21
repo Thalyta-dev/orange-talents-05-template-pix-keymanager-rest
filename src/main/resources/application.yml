@@ -9,7 +9,7 @@ grpc:
     port: 8089
   channels:
     pix: #nome do canal em GrpcClientFactory
-      address: 'localhost:50051'
+      address: ${ADDR:`localhost:50051`}
       plaintext: true
       max-retry-attempts: 5
 

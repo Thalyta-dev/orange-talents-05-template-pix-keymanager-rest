@@ -39,6 +39,7 @@ class ChavePixHandler : ExceptionHandler<StatusRuntimeException, HttpResponse<An
                 )
                 return HttpResponse.badRequest(body)
             }
+
             Status.Code.FAILED_PRECONDITION ->{
                     val details = if(status?.detailsList?.isEmpty() == true) BadRequest.getDefaultInstance() else status?.detailsList?.last()?.unpack(BadRequest::class.java)
                     val body = Erro(
